@@ -1,26 +1,11 @@
-// Campus Unlock — Prisma schema
-// Defaults to SQLite for zero-setup local development.
-// To use Postgres/MySQL in production, change the datasource provider
-// and DATABASE_URL in .env, then re-run `npm run prisma:migrate`.
-
 generator client {
   provider = "prisma-client-js"
 }
 
-// 👇 बस यह हिस्सा जोड़ना है 👇
 datasource db {
   provider = "postgresql" 
   url      = env("DATABASE_URL")
 }
-// 👆 ----------------------- 👆
-
-enum Role {
-  STUDENT
-  ADMIN
-}
-// ... (बाकी का पूरा कोड ज्यों का त्यों रहेगा)
-
-
 
 enum Role {
   STUDENT
@@ -159,11 +144,11 @@ model Scholarship {
 }
 
 model Review {
-  id         String   @id @default(cuid())
-  rating     Int      @default(5)
-  courseName String?
-  comment    String
-  createdAt  DateTime @default(now())
+  id           String   @id @default(cuid())
+  rating       Int      @default(5)
+  courseName   String?
+  comment      String
+  createdAt    DateTime @default(now())
 
   userId       String
   user         User       @relation(fields: [userId], references: [id])
@@ -172,26 +157,26 @@ model Review {
 }
 
 model Mentor {
-  id          String  @id @default(cuid())
-  name        String
-  designation String
-  specialty   String?
-  bio         String?
-  photo       String?
-  experienceYears Int  @default(3)
-  studentsHelped  Int  @default(500)
-  isActive    Boolean @default(true)
+  id              String  @id @default(cuid())
+  name            String
+  designation     String
+  specialty       String?
+  bio             String?
+  photo           String?
+  experienceYears Int     @default(3)
+  studentsHelped  Int     @default(500)
+  isActive        Boolean @default(true)
 }
 
 model Lead {
-  id        String      @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  purpose   LeadPurpose @default(ADMISSION)
-  message   String?
-  status    LeadStatus  @default(NEW)
-  createdAt DateTime    @default(now())
+  id           String      @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  purpose      LeadPurpose @default(ADMISSION)
+  message      String?
+  status       LeadStatus  @default(NEW)
+  createdAt    DateTime    @default(now())
 
   universityId String?
   university   University? @relation(fields: [universityId], references: [id])
@@ -208,8 +193,8 @@ model Blog {
   isPublished Boolean  @default(true)
   publishedAt DateTime @default(now())
 
-  authorId String?
-  author   User?  @relation(fields: [authorId], references: [id])
+  authorId    String?
+  author      User?    @relation(fields: [authorId], references: [id])
 }
 
 model Shortlist {
@@ -225,9 +210,9 @@ model Shortlist {
 }
 
 model Application {
-  id        String            @id @default(cuid())
-  status    ApplicationStatus @default(SUBMITTED)
-  appliedAt DateTime          @default(now())
+  id           String            @id @default(cuid())
+  status       ApplicationStatus @default(SUBMITTED)
+  appliedAt    DateTime          @default(now())
 
   userId       String
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -242,16 +227,16 @@ model SavedSearch {
   query     String
   createdAt DateTime @default(now())
 
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Setting {
-  id            Int    @id @default(1)
-  siteName      String @default("Campus Unlock")
-  supportEmail  String @default("support@campusunlock.com")
-  supportPhone  String @default("1800-123-4567")
-  address       String @default("Noida, Uttar Pradesh, India")
+  id           Int    @id @default(1)
+  siteName     String @default("Campus Unlock")
+  supportEmail String @default("support@campusunlock.com")
+  supportPhone String @default("1800-123-4567")
+  address      String @default("Noida, Uttar Pradesh, India")
 }
 
 /// Small configurable content blocks — feature highlights, trust badges,
