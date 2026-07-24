@@ -1,0 +1,255 @@
+// Campus Unlock — Prisma schema
+// Defaults to SQLite for zero-setup local development.
+// To use Postgres/MySQL in production, change the datasource provider
+// and DATABASE_URL in .env, then re-run `npm run prisma:migrate`.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+
+enum Role {
+  STUDENT
+  ADMIN
+}
+
+enum UniversityType {
+  GOVERNMENT
+  PRIVATE
+  DEEMED
+}
+
+enum LeadPurpose {
+  ADMISSION
+  COUNSELLING
+  CONTACT
+  SCHOLARSHIP
+}
+
+enum LeadStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  UNDER_REVIEW
+  ADMITTED
+  REJECTED
+}
+
+enum WidgetType {
+  FEATURE
+  TRUST_BADGE
+  STAT
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  email         String   @unique
+  password      String
+  phone         String?
+  role          Role     @default(STUDENT)
+  interestArea  String?
+  city          String?
+  bio           String?
+  avatar        String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  shortlist     Shortlist[]
+  applications  Application[]
+  savedSearches SavedSearch[]
+  reviews       Review[]
+  blogPosts     Blog[]
+}
+
+model University {
+  id             String         @id @default(cuid())
+  name           String
+  slug           String         @unique
+  type           UniversityType @default(PRIVATE)
+  location       String
+  establishedYear Int
+  logo           String?
+  banner         String?
+  about          String
+  rating         Float          @default(4.5)
+  totalReviews   Int            @default(0)
+  totalCourses   Int            @default(0)
+  totalStudents  Int            @default(0)
+  totalFaculty   Int            @default(0)
+  placementRate  String         @default("90%")
+  avgFees        Float          @default(0)
+  accreditation  String         @default("A+")
+  naacGrade      String         @default("A+")
+  ugcEntitled    Boolean        @default(true)
+  aicteApproved  Boolean        @default(true)
+  brochureUrl    String?
+  isFeatured     Boolean        @default(false)
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  categoryId     String?
+  category       Category?      @relation(fields: [categoryId], references: [id])
+
+  courses        Course[]
+  scholarships   Scholarship[]
+  reviews        Review[]
+  shortlist      Shortlist[]
+  applications   Application[]
+  leads          Lead[]
+}
+
+model Category {
+  id               String   @id @default(cuid())
+  name             String   @unique
+  slug             String   @unique
+  icon             String   @default("📚")
+  courseCountLabel String   @default("")
+
+  universities     University[]
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  title        String
+  slug         String   @unique
+  duration     String
+  fee          Float
+  rating       Float    @default(4.5)
+  totalReviews Int      @default(0)
+  tag          String?  // bestseller | popular | trending | top_rated
+  level        String   @default("Postgraduate") // Undergraduate | Postgraduate | Diploma
+  createdAt    DateTime @default(now())
+
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  applications Application[]
+}
+
+model Scholarship {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  amountText  String
+  deadline    DateTime
+  isActive    Boolean  @default(true)
+
+  universityId String?
+  university   University? @relation(fields: [universityId], references: [id])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  rating     Int      @default(5)
+  courseName String?
+  comment    String
+  createdAt  DateTime @default(now())
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id])
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+}
+
+model Mentor {
+  id          String  @id @default(cuid())
+  name        String
+  designation String
+  specialty   String?
+  bio         String?
+  photo       String?
+  experienceYears Int  @default(3)
+  studentsHelped  Int  @default(500)
+  isActive    Boolean @default(true)
+}
+
+model Lead {
+  id        String      @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  purpose   LeadPurpose @default(ADMISSION)
+  message   String?
+  status    LeadStatus  @default(NEW)
+  createdAt DateTime    @default(now())
+
+  universityId String?
+  university   University? @relation(fields: [universityId], references: [id])
+}
+
+model Blog {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  category    String   @default("Guides")
+  excerpt     String
+  body        String
+  cover       String?
+  isPublished Boolean  @default(true)
+  publishedAt DateTime @default(now())
+
+  authorId String?
+  author   User?  @relation(fields: [authorId], references: [id])
+}
+
+model Shortlist {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, universityId])
+}
+
+model Application {
+  id        String            @id @default(cuid())
+  status    ApplicationStatus @default(SUBMITTED)
+  appliedAt DateTime          @default(now())
+
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  universityId String
+  university   University @relation(fields: [universityId], references: [id], onDelete: Cascade)
+  courseId     String?
+  course       Course?    @relation(fields: [courseId], references: [id])
+}
+
+model SavedSearch {
+  id        String   @id @default(cuid())
+  query     String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Setting {
+  id            Int    @id @default(1)
+  siteName      String @default("Campus Unlock")
+  supportEmail  String @default("support@campusunlock.com")
+  supportPhone  String @default("1800-123-4567")
+  address       String @default("Noida, Uttar Pradesh, India")
+}
+
+/// Small configurable content blocks — feature highlights, trust badges,
+/// stat counters — shown on the public site (e.g. the "Why Choose X
+/// University?" panel) and fully manageable from the admin panel.
+model Widget {
+  id          String     @id @default(cuid())
+  widgetType  WidgetType @default(FEATURE)
+  icon        String     @default("⭐")
+  title       String
+  description String?
+  isActive    Boolean    @default(true)
+  position    Int        @default(1)
+}
