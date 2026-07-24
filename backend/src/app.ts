@@ -20,7 +20,14 @@ import { fail } from './utils/helpers';
 
 const app = express();
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:3000', credentials: true }));
+// 👇 CORS Error Fix (अब Vercel और Localhost दोनों काम करेंगे) 👇
+app.use(cors({
+  origin: true,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS']
+}));
+// 👆 ---------------------------------------------------- 👆
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
